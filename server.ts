@@ -609,19 +609,29 @@ app.post('/api/chat/ask', async (req: Request, res: Response) => {
     const { question, history, fileData, studyContext } = req.body;
     const ai = getGeminiClient();
 
-    const formattedHistory = Array.isArray(history)
+    const rawHistory = Array.isArray(history)
       ? history
-          .filter((msg: any) => msg && msg.text && msg.text.trim().length > 0)
+          .filter((msg: any) => msg && typeof msg.text === 'string' && msg.text.trim().length > 0)
           .slice(-8)
-          .map((msg: any) => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }],
-          }))
       : [];
 
-    // History must start with 'user' role
-    while (formattedHistory.length > 0 && formattedHistory[0].role !== 'user') {
-      formattedHistory.shift();
+    const formattedHistory: any[] = [];
+    for (const msg of rawHistory) {
+      const role = msg.sender === 'user' ? 'user' : 'model';
+      if (formattedHistory.length === 0) {
+        if (role === 'user') {
+          formattedHistory.push({ role: 'user', parts: [{ text: msg.text.trim() }] });
+        }
+      } else {
+        const lastRole = formattedHistory[formattedHistory.length - 1].role;
+        if (role !== lastRole) {
+          formattedHistory.push({ role, parts: [{ text: msg.text.trim() }] });
+        }
+      }
+    }
+    // Remove trailing user turn if history ends with user (since the new question will be the next user turn)
+    if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === 'user') {
+      formattedHistory.pop();
     }
 
     let contextPrompt = '';
@@ -678,6 +688,8 @@ ${contextPrompt}
         replyText = response.text || 'عذراً، لم أتمكن من الحصول على إجابة دقيقة من الملف المرفق.';
       }
     } else {
+      const userMessageText = (question && typeof question === 'string' && question.trim()) ? question.trim() : 'مرحباً';
+
       if (formattedHistory.length > 0) {
         try {
           const chatModel = (!modelQuotaCooldown['gemini-3.6-flash'] || modelQuotaCooldown['gemini-3.6-flash'] < Date.now())
@@ -690,19 +702,19 @@ ${contextPrompt}
             history: formattedHistory,
           });
 
-          const chatResponse = await chat.sendMessage(question || 'مرحباً');
+          const chatResponse = await chat.sendMessage({ message: userMessageText });
           replyText = chatResponse.text || 'عذراً، لم أتمكن من الحصول على إجابة دقيقة حالياً.';
         } catch (chatErr) {
           console.warn('Chat history failed, falling back to direct generateContent:', chatErr);
           const response = await callGeminiWithRetry(ai, {
-            contents: question || 'مرحباً',
+            contents: [{ role: 'user', parts: [{ text: userMessageText }] }],
             config: { systemInstruction },
           });
           replyText = response.text || 'عذراً، لم أتمكن من الحصول على إجابة دقيقة حالياً.';
         }
       } else {
         const response = await callGeminiWithRetry(ai, {
-          contents: question || 'مرحباً',
+          contents: [{ role: 'user', parts: [{ text: userMessageText }] }],
           config: { systemInstruction },
         });
         replyText = response.text || 'عذراً، لم أتمكن من الحصول على إجابة دقيقة حالياً.';
