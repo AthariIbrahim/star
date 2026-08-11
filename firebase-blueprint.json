@@ -1,0 +1,106 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "Student personal accounts and profiles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "gradeLevel": { "type": "string" },
+        "targetExam": { "type": "string" },
+        "streakDays": { "type": "number" },
+        "points": { "type": "number" },
+        "isLoggedIn": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "lastActive": { "type": "string" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "content_items": {
+      "title": "Content Items",
+      "description": "Extracted and processed study materials",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "sourceName": { "type": "string" },
+        "rawContent": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "durationOrSize": { "type": "string" },
+        "extractedText": { "type": "string" },
+        "summary": { "type": "string" },
+        "keyTakeaways": { "type": "array", "items": { "type": "string" } },
+        "topic": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "type", "createdAt"]
+    },
+    "summaries": {
+      "title": "Summaries",
+      "description": "Generated study summaries and flashcards",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "contentId": { "type": "string" },
+        "subject": { "type": "string" },
+        "summaryText": { "type": "string" },
+        "keyPoints": { "type": "array", "items": { "type": "string" } },
+        "flashcards": { "type": "array", "items": { "type": "object" } },
+        "cheatSheet": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "createdAt"]
+    },
+    "quizzes": {
+      "title": "Quizzes",
+      "description": "Quizzes and attempts",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "contentId": { "type": "string" },
+        "questions": { "type": "array", "items": { "type": "object" } },
+        "attempts": { "type": "array", "items": { "type": "object" } },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "createdAt"]
+    },
+    "study_tasks": {
+      "title": "Study Tasks",
+      "description": "Study plan tasks",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "dueDate": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "priority": { "type": "string" },
+        "estimatedMinutes": { "type": "number" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["title", "completed"]
+    },
+    "exam_reminders": {
+      "title": "Exam Reminders",
+      "description": "Upcoming exam reminders and goals",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "examDate": { "type": "string" },
+        "examTime": { "type": "string" },
+        "location": { "type": "string" },
+        "targetScore": { "type": "number" },
+        "priority": { "type": "string" },
+        "notes": { "type": "string" },
+        "topics": { "type": "array", "items": { "type": "string" } },
+        "isPrepared": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "examDate"]
+    }
+  }
+}
